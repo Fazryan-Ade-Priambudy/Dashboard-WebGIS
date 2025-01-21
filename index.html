@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Penggunaan Lahan Kota Bandar Lampung</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<!-- NAVBAR -->
+<body>
+    <nav class="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+        <div class="max-w-screen-2xl flex flex-wrap items-center justify-between mx-auto p-4">
+          <a href="https://id.wikipedia.org/wiki/Daftar_kecamatan_dan_kelurahan_di_Kota_Bandar_Lampung" class="flex items-center space-x-3 rtl:space-x-reverse">
+              <img src="Lampung.png" class="h-10" alt="Logo">
+              <img src="Bandar Lampung.png" class="h-10" alt="Logo"/>
+              <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Peta Penggunaan Lahan Kota Bandar Lampung</span>
+          </a>
+          <button data-collapse-toggle="navbar-solid-bg" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-solid-bg" aria-expanded="false">
+              <span class="sr-only">Open main menu</span>
+              <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+              </svg>
+          </button>
+          <div class="hidden w-full md:block md:w-auto" id="navbar-solid-bg">
+            <ul class="flex flex-col font-medium mt-4 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent dark:border-gray-700">
+              <li><a href="#" class="block py-2 px-3 md:p-0 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:dark:text-blue-500 dark:bg-blue-600 md:dark:bg-transparent" aria-current="page">Dashboard</a></li>
+              <li><a href="https://fazryan-ade-priambudy.github.io/Interactive-Map/" class="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Fullscreen</a></li>
+              <li><a href="https://id.wikipedia.org/wiki/Daftar_kecamatan_dan_kelurahan_di_Kota_Bandar_Lampung" class="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a></li>
+              <li><a href="https://www.linkedin.com/in/fazryan-ade-priambudy/" class="block py-2 px-3 md:p-0 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>      
+      
+    <!-- Main Content -->
+    <div class="container mx-auto mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Peta -->
+        <div class="bg-white p-4 shadow-lg rounded">
+          <h2 class="text-lg font-semibold mb-4">Peta Interaktif</h2>
+          <iframe src="https://fazryan-ade-priambudy.github.io/Interactive-Map/" class="w-full h-80 border rounded" allowfullscreen></iframe>
+        </div>
+
+    <!-- Diagram -->
+    <div class="bg-white p-4 shadow-lg rounded">
+        <h2 class="text-lg font-semibold mb-4">Diagram Infografis</h2>
+        <!-- <canvas id="chart" class="w-full h-80"></canvas> -->
+        <!-- <h2 style="text-align: center;">Total Suara Partai per Kabupaten/Kota</h2> -->
+        <canvas id="stackedBarChart" width="800" height="400"></canvas>
+    </div>
+    
+<script>
+// Labels untuk sumbu X (Penggunaan Lahan)
+    const labels = ["BUMI WARAS","ENGGAL","KEDAMAIAN","KEDATON","KEMILING","LABUHAN RATU","LANGKAPURA","PANJANG","RAJABASA","SUKABUMI","SUKARAME","TANJUNG KARANG BARAT","TANJUNG KARANG PUSAT","TANJUNG KARANG TIMUR","TANJUNG SENANG","TELUK BETUNG BARAT","TELUK BETUNG SELATAN","TELUK BETUNG TIMUR","TELUK BETUNG UTARA","WAY HALIM",];
+
+// Data Penggunaan Lahan Provinsi Lampung
+    const dataPenggunaanLahan = {
+        "Belukar": ["0.00","0.00","0.00","0.00","10.00","0.00","0.00","0.00","0.00","62.80","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00"],
+        "Pemukiman": ["394.54","287.81","597.99","374.46","680.79","616.07","533.18","846.31","1024.43","1478.19","793.68","756.50","494.22","309.37","192.13","288.53","364.63","293.77","413.09","560.62"],
+        "Pertanian Lahan Kering": ["0.00","0.00","0.00","0.00","222.04","0.00","0.00","0.00","0.00","185.50","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00"],
+        "Pertanian Lahan Kering Campur": ["23.26","0.00","209.53","8.71","804.26","0.00","92.43","711.58","8.35","825.36","2.06","688.53","35.57","0.00","0.00","814.08","154.15","733.83","0.00","0.00"],
+        "Sawah": ["0.00","0.00","22.31","0.00","0.00","0.00","0.00","0.00","125.37","29.97","292.81","0.00","0.00","0.00","65.75","0.00","0.00","0.00","0.00","0.00"],
+        "Tambak": ["0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","23.29","0.00","0.00"],
+        "Tanah Terbuka": ["0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","47.99","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00","0.00"],
+    };
+
+// Warna khusus untuk setiap Penggunaan Lahan
+    const penggunaanlahanColors = {
+        "Belukar": "darkgreen",
+        "Pemukiman": "orangered",
+        "Pertanian Lahan Kering": "yellow",
+        "Pertanian Lahan Kering Campur": "lightgreen",
+        "Sawah": "cyan",
+        "Tambak": "darkblue",
+        "Tanah Terbuka": "violet",
+    };
+
+// Menyiapkan dataset
+    const datasets = Object.keys(dataPenggunaanLahan).map(penggunaanlahan => ({
+        label: penggunaanlahan,
+        data: dataPenggunaanLahan[penggunaanlahan],
+        backgroundColor: penggunaanlahanColors[penggunaanlahan],
+        borderColor: penggunaanlahanColors[penggunaanlahan],
+        borderWidth: 1
+    }));
+
+// Membuat grafik
+    const ctx = document.getElementById('stackedBarChart').getContext('2d');
+    const stackedBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+            },
+            scales: {
+                x: {
+                    stacked: true // Mengaktifkan stack pada sumbu X
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+</div>
+
+ <!-- Tabel -->
+ <div class="container mx-auto mt-6 bg-white p-4 shadow-lg rounded">
+    <h2 class="text-lg font-semibold mb-4">Data Luas Penggunaan Lahan Perkecamatan</h2>
+    <div class="overflow-y-auto h-80 border rounded"> <!-- Kontainer dengan scroll -->
+      <table class="table-auto w-full border">
+        <thead class="bg-white-200">
+        <tr>
+  <thead>
+        <tr>
+            <td class="px-4 py-2 font-semibold border-gray-300">PROVINSI</td>
+            <td class="px-4 py-2 font-semibold border-gray-300">KABUPATEN/KOTA</td>
+            <td class="px-4 py-2 font-semibold border-gray-300">KECAMATAN</td>
+            <td class="px-4 py-2 font-semibold border-gray-300">PENGGUNAAN LAHAN</td>
+            <td class="px-4 py-2 font-semibold border-gray-300">LUAS (HA)</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">BUMI WARAS</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">394.54</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">BUMI WARAS</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">23.26</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">ENGGAL</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">287.81</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEDAMAIAN</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">597.99</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEDAMAIAN</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">209.53</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEDAMAIAN</td>
+            <td class="px-4 py-2 border border-gray-300">Sawah</td>
+            <td class="px-4 py-2 border border-gray-300">22.31</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEDATON</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">374.46</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEDATON</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">8.71</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEMILING</td>
+            <td class="px-4 py-2 border border-gray-300">Belukar</td>
+            <td class="px-4 py-2 border border-gray-300">10.00</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEMILING</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">680.79</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEMILING</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering</td>
+            <td class="px-4 py-2 border border-gray-300">222.04</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">KEMILING</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">804.26</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">LABUHAN RATU</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">616.07</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">LANGKAPURA</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">533.18</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">LANGKAPURA</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">92.43</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">PANJANG</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">846.31</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">PANJANG</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">711.58</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">RAJABASA</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">1024.43</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">RAJABASA</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">8.35</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">RAJABASA</td>
+            <td class="px-4 py-2 border border-gray-300">Sawah</td>
+            <td class="px-4 py-2 border border-gray-300">125.37</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKABUMI</td>
+            <td class="px-4 py-2 border border-gray-300">Belukar</td>
+            <td class="px-4 py-2 border border-gray-300">62.80</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKABUMI</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">1478.19</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKABUMI</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering</td>
+            <td class="px-4 py-2 border border-gray-300">185.50</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKABUMI</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">825.36</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKABUMI</td>
+            <td class="px-4 py-2 border border-gray-300">Sawah</td>
+            <td class="px-4 py-2 border border-gray-300">29.97</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKARAME</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">793.68</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKARAME</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">2.06</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKARAME</td>
+            <td class="px-4 py-2 border border-gray-300">Sawah</td>
+            <td class="px-4 py-2 border border-gray-300">292.81</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">SUKARAME</td>
+            <td class="px-4 py-2 border border-gray-300">Tanah Terbuka</td>
+            <td class="px-4 py-2 border border-gray-300">47.99</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TANJUNG SENANG</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">756.50</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TANJUNG SENANG</td>
+            <td class="px-4 py-2 border border-gray-300">Sawah</td>
+            <td class="px-4 py-2 border border-gray-300">65.75</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TANJUNGKARANG BARAT</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">494.22</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TANJUNGKARANG BARAT</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">688.53</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TANJUNGKARANG PUSAT</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">309.37</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TANJUNGKARANG PUSAT</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">35.57</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TANJUNGKARANG TIMUR</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">192.13</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG BARAT</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">288.53</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG BARAT</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">814.08</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG SELATAN</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">364.63</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG SELATAN</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">154.15</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG TIMUR</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">293.77</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG TIMUR</td>
+            <td class="px-4 py-2 border border-gray-300">Pertanian Lahan Kering Campur</td>
+            <td class="px-4 py-2 border border-gray-300">733.83</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG TIMUR</td>
+            <td class="px-4 py-2 border border-gray-300">Tambak</td>
+            <td class="px-4 py-2 border border-gray-300">23.29</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">TELUKBETUNG UTARA</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">413.09</td>
+        </tr>
+        <tr>
+            <td class="px-4 py-2 border border-gray-300">Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">Bandar Lampung</td>
+            <td class="px-4 py-2 border border-gray-300">WAY HALIM</td>
+            <td class="px-4 py-2 border border-gray-300">Pemukiman</td>
+            <td class="px-4 py-2 border border-gray-300">560.62</td>
+        </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+</body>
+</html>
